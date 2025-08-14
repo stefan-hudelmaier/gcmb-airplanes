@@ -175,11 +175,10 @@ class Adapter:
                 # Sanitize the callsign for use in the topic
                 sanitized_callsign = sanitize_topic(callsign)
 
-                # Create the topic
                 topic = f"{self.base_topic}/flights/{sanitized_callsign}/location"
 
                 # Publish the location
-                self.mqtt_publisher.send_msg(f"{lat},{lon}", topic, retain=True)
+                self.mqtt_publisher.send_msg(f"{lat},{lon}", topic, retain=True, message_expiry_interval=10)
                 logger.debug(f"Published location for {callsign} to {topic}")
 
                 # Add to messages cache for stats
@@ -218,7 +217,7 @@ def main():
     """
     try:
         # Create MQTT publisher with 10-minute message retention
-        mqtt_publisher = MqttPublisher(enable_watchdog=True, message_retention_time_seconds=600)
+        mqtt_publisher = MqttPublisher(enable_watchdog=True)
 
         # Create and start the adapter
         adapter = Adapter(

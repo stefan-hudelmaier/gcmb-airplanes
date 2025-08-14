@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "cachetools>=6.1.0",
-    "gcmb-publisher>=0.4.0",
+    "gcmb-publisher>=0.6.0",
     "pytest>=8.4.0",
     "python-dateutil>=2.9.0.post0",
     "python-dotenv>=1.1.0",
