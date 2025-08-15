@@ -3,8 +3,8 @@
 This is a real-time stream of airplane positions based on SBS1 data above my home. Here are the 
 currently detected airplanes (updated live):
 
-<WorldMap default-lat="48.4931" default-lon="9.4042" default-zoom="7">
- <Markers topic-pattern="stefan/airplanes/flights/+/location" />
+<WorldMap defaultLat="48.4931" defaultLon="9.4042" defaultZoom="7">
+ <Markers topicPattern="stefan/airplanes/flights/+/location" />
 </WorldMap>
 
 The data is collected via an ADSB stick. Here is an image of the ADSB stick connected
