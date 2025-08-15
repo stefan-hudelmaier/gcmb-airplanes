@@ -74,6 +74,9 @@ class Adapter:
         # For measuring throughput
         self.messages_cache = TTLCache(maxsize=100_000, ttl=60)
 
+        # Dictionary to track last publish time for each flight (for debouncing)
+        self.last_publish_time = {}
+
         # Flag to control the running of threads
         self.running = True
 
@@ -177,12 +180,28 @@ class Adapter:
 
                 topic = f"{self.base_topic}/flights/{sanitized_callsign}/location"
 
-                # Publish the location
-                self.mqtt_publisher.send_msg(f"{lat},{lon}", topic, retain=True, message_expiry_interval=10)
-                logger.debug(f"Published location for {callsign} to {topic}")
+                # Get current time
+                current_time = time.time()
 
-                # Add to messages cache for stats
-                self.messages_cache[time.time()] = None
+                # Check if we should publish (debouncing logic)
+                should_publish = False
+
+                # If this is the first time seeing this flight or 5 seconds have passed since last publish
+                if (sanitized_callsign not in self.last_publish_time or 
+                    current_time - self.last_publish_time[sanitized_callsign] >= 5):
+                    should_publish = True
+                    # Update the last publish time for this flight
+                    self.last_publish_time[sanitized_callsign] = current_time
+
+                if should_publish:
+                    # Publish the location
+                    self.mqtt_publisher.send_msg(f"{lat},{lon}", topic, retain=True, message_expiry_interval=10)
+                    logger.debug(f"Published location for {callsign} to {topic}")
+
+                    # Add to messages cache for stats
+                    self.messages_cache[current_time] = None
+                else:
+                    logger.debug(f"Skipped publishing for {callsign} due to debouncing (5s)")
 
             except Exception as e:
                 logger.error(f"Error publishing location: {e}")
